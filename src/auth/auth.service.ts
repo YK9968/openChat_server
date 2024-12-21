@@ -33,10 +33,10 @@ export class AuthService {
 
     const validatePwd = await bcrypt.compare(dto.password, user.password);
     if (!validatePwd) throw new BadRequestException(AppErrors.INVALID_DATA);
-
+    const userinfo = { email: user.email, name: user.name };
     const tokens = await this.issueTokens(user.email, user.id);
 
-    return tokens;
+    return { userinfo, tokens };
   }
 
   private async issueTokens(email: string, id: string) {
