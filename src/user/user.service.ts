@@ -25,4 +25,16 @@ export class UserService {
 
     return user;
   }
+
+  async findUsersByPhoneNumber(phone: string): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        phone: {
+          contains: phone,
+        },
+      },
+    });
+
+    return users;
+  }
 }
