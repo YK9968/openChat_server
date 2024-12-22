@@ -7,7 +7,12 @@ import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { ChatModule } from './chat/chat.module';
 
 @Module({
-  imports: [AuthModule, UserModule, ConfigModule.forRoot({ isGlobal: true }), ChatModule],
+  imports: [
+    AuthModule,
+    UserModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    ChatModule,
+  ],
   controllers: [],
   providers: [
     {
