@@ -21,6 +21,8 @@ model User {
   messages  Message[]
 }
 
+
+
 model Chat {
   id        String    @id @default(cuid())
   createdAt DateTime  @default(now()) @map("created_at")
