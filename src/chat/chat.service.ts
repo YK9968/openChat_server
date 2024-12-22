@@ -1,13 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
-import { Chat } from '@prisma/client';
 import { AppErrors } from 'src/errors';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class ChatService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createChat(user1: string, user2: string): Promise<Chat> {
+  async createChat(user1: string, user2: string) {
     const users = await this.prisma.user.findMany({
       where: {
         id: {
@@ -43,7 +42,7 @@ export class ChatService {
     return newChat;
   }
 
-  async findUserChats(userId: string): Promise<Chat[]> {
+  async findUserChats(userId: string) {
     const chats = await this.prisma.chat.findMany({
       where: {
         OR: [{ userId1: userId }, { userId2: userId }],
