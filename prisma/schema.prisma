@@ -3,41 +3,40 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())  
-  name      String  
-  email     String  @unique  
-  phone     String  @unique  
-  password  String  
-  createdAt DateTime @default(now()) @map("created_at")  
-  updatedAt DateTime @updatedAt @map("updated_at")  
-  messages  Message[] 
-  chats1    Chat[]  @relation("UserChat1")  
-  chats2    Chat[]  @relation("UserChat2")
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  phone     String    @unique
+  password  String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  chats1    Chat[]    @relation("UserChat1")
+  chats2    Chat[]    @relation("UserChat2")
+  messages  Message[]
 }
 
-
 model Chat {
-  id          String   @id @default(cuid())  
-  userId1     String   
-  userId2     String   
-  createdAt   DateTime @default(now()) @map("created_at") 
-  user1       User     @relation("UserChat1", fields: [userId1], references: [id])  
-  user2       User     @relation("UserChat2", fields: [userId2], references: [id]) 
-  messages    Message[]
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now()) @map("created_at")
+  userId1   String
+  userId2   String
+  user1     User      @relation("UserChat1", fields: [userId1], references: [id])
+  user2     User      @relation("UserChat2", fields: [userId2], references: [id])
+  messages  Message[]
 }
 
 model Message {
-  id        String   @id @default(cuid()) 
+  id        String   @id @default(cuid())
   chatId    String   @map("chat_id")
   userId    String   @map("user_id")
-  text      String   
+  text      String
   createdAt DateTime @default(now()) @map("created_at")
-  chat      Chat     @relation(fields: [chatId], references: [id]) 
-  user      User     @relation(fields: [userId], references: [id]) 
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
