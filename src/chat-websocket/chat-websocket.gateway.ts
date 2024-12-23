@@ -6,11 +6,12 @@ import {
   SubscribeMessage,
   MessageBody,
   WebSocketGateway,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatWebsocketService } from './chat-websocket.service';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: { origin: '*' } })
 export class ChatWebsocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -31,16 +32,21 @@ export class ChatWebsocketGateway
     console.log(`Client disconnected: ${client.id}`);
   }
 
+  @SubscribeMessage('join_chat')
+  handleJoinChat(
+    @MessageBody() data: { chatId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(data.chatId);
+  }
+
   @SubscribeMessage('send_message')
   async handleMessage(
-    @MessageBody() data: { chatId: string; userId: string; message: string },
+    @MessageBody() data: { chatId: string; message: string; userId: string },
   ) {
     const { chatId, userId, message } = data;
-
     await this.chatWebsocketService.saveMessage(chatId, userId, message);
-
-    this.server.to(chatId).emit('new_message', { userId, message });
-
+    this.server.to(chatId).emit('new_message', { userId, message, chatId });
     return { status: 'Message sent successfully' };
   }
 }
