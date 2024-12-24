@@ -40,19 +40,46 @@ export class ChatWebsocketGateway
     client.join(data.chatId);
   }
 
+  @SubscribeMessage('update_message')
+  async handleUpdateMessage(
+    @MessageBody() data: { messageId: string; newMessage: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const updatedMessage = await this.chatWebsocketService.updateMessage(
+      data.messageId,
+      data.newMessage,
+    );
+    this.server.to(client.id).emit('message_updated', {
+      userId: updatedMessage.userId,
+      text: updatedMessage.text,
+      chatId: updatedMessage.chatId,
+      createdAt: updatedMessage.createdAt,
+      id: updatedMessage.id,
+    });
+  }
+
+  @SubscribeMessage('delete_message')
+  async handleDeleteMessage(
+    @MessageBody() data: { messageId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    await this.chatWebsocketService.deleteMessage(data.messageId);
+    this.server.to(client.id).emit('message_deleted', data.messageId);
+  }
+
   @SubscribeMessage('send_message')
   async handleMessage(
-    @MessageBody() data: { chatId: string; message: string; userId: string },
+    @MessageBody() data: { chatId: string; text: string; userId: string },
   ) {
-    const { chatId, userId, message } = data;
+    const { chatId, userId, text } = data;
     const savedMessage = await this.chatWebsocketService.saveMessage(
       chatId,
       userId,
-      message,
+      text,
     );
     this.server.to(chatId).emit('new_message', {
       userId,
-      message,
+      text,
       chatId,
       createdAt: savedMessage.createdAt,
       id: savedMessage.id,
