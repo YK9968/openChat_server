@@ -45,8 +45,18 @@ export class ChatWebsocketGateway
     @MessageBody() data: { chatId: string; message: string; userId: string },
   ) {
     const { chatId, userId, message } = data;
-    await this.chatWebsocketService.saveMessage(chatId, userId, message);
-    this.server.to(chatId).emit('new_message', { userId, message, chatId });
+    const savedMessage = await this.chatWebsocketService.saveMessage(
+      chatId,
+      userId,
+      message,
+    );
+    this.server.to(chatId).emit('new_message', {
+      userId,
+      message,
+      chatId,
+      createdAt: savedMessage.createdAt,
+      id: savedMessage.id,
+    });
     return { status: 'Message sent successfully' };
   }
 }
