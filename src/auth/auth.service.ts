@@ -51,7 +51,7 @@ export class AuthService {
     const data = { email, id };
 
     const accessToken = this.jwtService.sign(data, {
-      expiresIn: '1h',
+      expiresIn: '1d',
     });
     const refreshToken = this.jwtService.sign(data, {
       expiresIn: '7d',
@@ -66,6 +66,17 @@ export class AuthService {
       const user = await this.userService.findUser(result.email);
       const tokens = await this.issueTokens(user.email, user.id);
       return tokens;
+    } catch {
+      throw new UnauthorizedException(AppErrors.UNAUTHORIZE);
+    }
+  }
+
+  async refreshUser(refreshToken: string) {
+    try {
+      const result = await this.jwtService.verifyAsync(refreshToken);
+      const user = await this.userService.findUser(result.email);
+
+      return user;
     } catch {
       throw new UnauthorizedException(AppErrors.UNAUTHORIZE);
     }

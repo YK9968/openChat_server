@@ -1,8 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
+  Headers,
   HttpCode,
   Post,
+  UnauthorizedException,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -10,10 +13,37 @@ import { AuthService } from './auth.service';
 import { LoginUserDto, RegisterUserDto } from './dto/auth.dto';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { Auth } from 'src/decorators/auth.decorator';
+import { AppErrors } from 'src/errors';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('/refresh-user')
+  @Auth()
+  async refreshUser(@Headers('authorization') authorization: string) {
+    if (!authorization) {
+      throw new UnauthorizedException(AppErrors.UNAUTHORIZE);
+    }
+
+    const refreshToken = authorization.replace('Bearer ', '');
+    if (!refreshToken) {
+      throw new UnauthorizedException(AppErrors.UNAUTHORIZE);
+    }
+
+    const data = await this.authService.refreshUser(refreshToken);
+    const user = {
+      id: data.id,
+      emil: data.email,
+      name: data.name,
+    };
+
+    return {
+      status: 200,
+      message: 'Successfully refreshed user',
+      data: user,
+    };
+  }
 
   @UsePipes(new ValidationPipe())
   @Post('/register')
