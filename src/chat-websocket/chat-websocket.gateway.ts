@@ -44,17 +44,17 @@ export class ChatWebsocketGateway
   async handleUpdateMessage(
     @MessageBody()
     data: {
-      chatId: string;
       messageId: string;
       newMessage: string;
     },
   ) {
+    console.log(data.messageId);
     const updatedMessage = await this.chatWebsocketService.updateMessage(
       data.messageId,
       data.newMessage,
     );
 
-    this.server.to(data.chatId).emit('message_updated', {
+    this.server.to(updatedMessage.chatId).emit('message_updated', {
       userId: updatedMessage.userId,
       text: updatedMessage.text,
       chatId: updatedMessage.chatId,
