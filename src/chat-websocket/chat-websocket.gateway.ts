@@ -42,14 +42,19 @@ export class ChatWebsocketGateway
 
   @SubscribeMessage('update_message')
   async handleUpdateMessage(
-    @MessageBody() data: { messageId: string; newMessage: string },
-    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      chatId: string;
+      messageId: string;
+      newMessage: string;
+    },
   ) {
     const updatedMessage = await this.chatWebsocketService.updateMessage(
       data.messageId,
       data.newMessage,
     );
-    this.server.to(client.id).emit('message_updated', {
+
+    this.server.to(data.chatId).emit('message_updated', {
       userId: updatedMessage.userId,
       text: updatedMessage.text,
       chatId: updatedMessage.chatId,
@@ -60,11 +65,11 @@ export class ChatWebsocketGateway
 
   @SubscribeMessage('delete_message')
   async handleDeleteMessage(
-    @MessageBody() data: { messageId: string },
-    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { messageId: string; chatId: string },
   ) {
     await this.chatWebsocketService.deleteMessage(data.messageId);
-    this.server.to(client.id).emit('message_deleted', data.messageId);
+
+    this.server.to(data.chatId).emit('message_deleted', data.messageId);
   }
 
   @SubscribeMessage('send_message')
@@ -77,6 +82,7 @@ export class ChatWebsocketGateway
       userId,
       text,
     );
+
     this.server.to(chatId).emit('new_message', {
       userId,
       text,
